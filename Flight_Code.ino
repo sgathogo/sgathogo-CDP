@@ -21,11 +21,14 @@ LIS3MDL::vector<int16_t> m_min = {-32767, -32767, -32767};
 LIS3MDL::vector<int16_t> m_max = {+32767, +32767, +32767}; 
 
 // RGB LED pin definitions
-const int redPin = 5;
-const int greenPin = 6;
-const int bluePin = 7;
+const int redPin = 35;
+const int greenPin = 34;
+const int bluePin = 33;
 
 void setup() {
+  Serial.begin(115200);
+
+  
   pinMode(redPin, OUTPUT);
   pinMode(greenPin, OUTPUT);
   pinMode(bluePin, OUTPUT);
@@ -67,10 +70,10 @@ void setup() {
     while (1);  // Infinite loop to stop the program
   }
 
-  Wire1.begin(); // Initialize I2C communication over second pair of I2C Teensy pins
+  Wire.begin(); // Initialize I2C communication over second pair of I2C Teensy pins
 
   // Initialize the BMP388 sensor with I2C communication
-  if (!bmp.begin_I2C(0x77, &Wire1)) {  // Uses second pair of I2C pins for Teensy 4.1
+  if (!bmp.begin_I2C(0x77, &Wire)) {  // Uses second pair of I2C pins for Teensy 4.1
     // If sensor initialization fails, print an error message and halt execution
     Serial.println("Failed to detect and initialize BMP388 on startup!");
     digitalWrite(redPin, HIGH);
@@ -83,8 +86,11 @@ void setup() {
   bmp.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_3);
   bmp.setOutputDataRate(BMP3_ODR_100_HZ);
 
-  Wire.begin(); // Initialize I2C communication for IMU
+  Wire1.begin(); // Initialize I2C communication for IMU
   
+  imu.setBus(&Wire1);
+  mag.setBus(&Wire1);
+
   // Initialize IMU (LIS3MDL and LSM6)
   if (!imu.init() || !mag.init()) {
     Serial.println("Failed to detect IMU sensor on startup!");
